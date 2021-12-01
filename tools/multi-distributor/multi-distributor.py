@@ -7,6 +7,8 @@ import signal
 import os
 import subprocess
 import re
+from collections import OrderedDict
+from functools import reduce
 
 
 def get_env():
@@ -123,6 +125,18 @@ def parse_sig(log):
         return sig.group(1)
     else:
         return "Error parsing signature - check the detailed logs."
+
+
+def read_addresses(input_path):
+    accounts = OrderedDict()
+    try:
+        with open(input_path) as f:
+            for line in f:
+                address, balance = line.split(",")
+                accounts[address.strip()] = int(balance.strip())
+    except (OSError, IOError) as e:
+        sys.exit(f"Error opening address list files.\n{e.strerror}")
+    return accounts
 
 
 def run(cmd):
@@ -351,19 +365,16 @@ def before(input_file, drop, addr_type):
     output_file = "./before.csv"
     print("recipient,current-balance,expected-balance")
 
-    lines = []
-    with open(input_file, "r") as f:
-        lines = f.readlines()
+    accounts = read_addresses(input_file)
 
     with open(output_file, "w") as fw:
-        for line in lines:
+        for addr, ct in accounts.items():
             try:
-                addr = line.strip()
                 ok, balance = get_balance(addr, addr_type, TOKEN_MINT, RPC_URL)
             except (IndexError, ValueError) as e:
                 sys.exit("Error when reading input file: " + str(e))
             if ok:
-                expected = float(balance) + drop
+                expected = float(balance) + drop * ct
                 print(
                     f"{addr} - {balance:.{TOKEN_DECIMALS}f} - {expected:.{TOKEN_DECIMALS}f}"
                 )
@@ -371,14 +382,13 @@ def before(input_file, drop, addr_type):
                     f"{addr},{balance:.{TOKEN_DECIMALS}f},{expected:.{TOKEN_DECIMALS}f}\n"
                 )
             else:
-                expected = drop
+                expected = drop * ct
                 print(f"{addr} - No token account - {expected:.{TOKEN_DECIMALS}f}")
                 fw.write(f"{addr},No token account,{expected:.{TOKEN_DECIMALS}f}\n")
 
 
 def after(input_file, addr_type):
     global TOKEN_MINT, TOKEN_DECIMALS, RPC_URL
-    lines = []
     output_file = "./after.csv"
     print("recipient,expected-balance,actual-balance,difference")
     with open(input_file, "r") as f:
@@ -453,14 +463,17 @@ def transfer(
     drop = amount_prompt(drop_amount)
     print(f"Airdrop amount: {bcolors.OKGREEN}{drop:,.{TOKEN_DECIMALS}f}{bcolors.ENDC}")
 
+    accounts = OrderedDict()
     try:
         with open(input_path) as f:
-            address_list = f.read().splitlines()
+            for line in f:
+                address, balance = line.split(",")
+                accounts[address.strip()] = int(balance.strip())
+        print(f"Airdropping to {bcolors.OKGREEN}{len(accounts)}{bcolors.ENDC} users\n")
+
+        total_items = reduce(lambda x, y: x + y, accounts.values(), 0)
         print(
-            f"Airdropping to {bcolors.OKGREEN}{len(address_list)} users{bcolors.ENDC}"
-        )
-        print(
-            f"Estimated total tokens to be distributed: {bcolors.OKGREEN}{(len(address_list) * drop):,f}{bcolors.ENDC}\n"
+            f"Estimated total tokens to be distributed: {bcolors.OKGREEN}{(total_items * drop):,f}{bcolors.ENDC}\n"
         )
     except (OSError, IOError) as e:
         sys.exit(f"Error opening address list files.\n{e.strerror}")
@@ -494,8 +507,8 @@ def transfer(
         continue_airdrop_prompt(interactive, SEPARATOR)
 
         i = 0
-        while i < len(address_list):
-            addr = (address_list[i]).strip()
+        for addr, ct in accounts.items():
+            amount = drop * ct
             options = []
             if fund_recipient:
                 options.append("--fund-recipient")
@@ -506,7 +519,7 @@ def transfer(
                 "transfer",
                 TOKEN_MINT,
                 TOKEN_DECIMALS,
-                drop,
+                amount,
                 addr,
                 RPC_URL,
                 options,
@@ -518,7 +531,7 @@ def transfer(
                 log_detail_entry += try_transfer(
                     cmd,
                     addr,
-                    drop,
+                    amount,
                     log_success,
                     log_unconfirmed,
                     log_failed,
@@ -538,7 +551,7 @@ def transfer(
                 log_detail_entry += f"{i+1}. Cmdline: {cmd.to_str()}\n"
 
                 confirm, switch_mode = single_transaction_prompt(
-                    cmd.to_str(), drop, addr, TOKEN_DECIMALS
+                    cmd.to_str(), amount, addr, TOKEN_DECIMALS
                 )
                 if switch_mode:
                     print("Switching to non-interactive mode.")
@@ -549,7 +562,7 @@ def transfer(
                     log_detail_entry += try_transfer(
                         cmd,
                         addr,
-                        drop,
+                        amount,
                         log_success,
                         log_unconfirmed,
                         log_failed,
@@ -562,7 +575,7 @@ def transfer(
                         lf.write(log_detail_entry + LOG_SEPARATOR)
                 elif not confirm:
                     print(f"{bcolors.DANGER}CANCELED{bcolors.ENDC}", flush=True)
-                    cancel = f"{addr},{drop:f}"
+                    cancel = f"{addr},{amount:f}"
                     with open(log_canceled, "a") as lc:
                         lc.write(cancel + "\n")
                     log_detail_entry += f"Cancel: {cancel}\n"

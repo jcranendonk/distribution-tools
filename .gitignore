@@ -7,3 +7,8 @@
 
 # Local History for Visual Studio Code
 .history/
+
+tools/**/*.log
+tools/**/*.csv
+tools/**/config.env
+.DS_Store
