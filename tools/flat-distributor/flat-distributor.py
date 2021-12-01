@@ -365,14 +365,14 @@ def before(input_file, drop, addr_type):
             if ok:
                 expected = float(balance) + drop
                 print(
-                    f"{addr} - {balance:.{TOKEN_DECIMALS}f} - {expected:.{TOKEN_DECIMALS}f}"
+                    f"{addr} - {balance:,.{TOKEN_DECIMALS}f} - {expected:,.{TOKEN_DECIMALS}f}"
                 )
                 fw.write(
                     f"{addr},{balance:.{TOKEN_DECIMALS}f},{expected:.{TOKEN_DECIMALS}f}\n"
                 )
             else:
                 expected = drop
-                print(f"{addr} - No token account - {expected:.{TOKEN_DECIMALS}f}")
+                print(f"{addr} - No token account - {expected:,.{TOKEN_DECIMALS}f}")
                 fw.write(f"{addr},No token account,{expected:.{TOKEN_DECIMALS}f}\n")
 
 
@@ -460,7 +460,7 @@ def transfer(
             f"Airdropping to {bcolors.OKGREEN}{len(address_list)} users{bcolors.ENDC}"
         )
         print(
-            f"Estimated total tokens to be distributed: {bcolors.OKGREEN}{(len(address_list) * drop):,f}{bcolors.ENDC}\n"
+            f"Estimated total tokens to be distributed: {bcolors.OKGREEN}{(len(address_list) * drop):,.{TOKEN_DECIMALS}f}{bcolors.ENDC}\n"
         )
     except (OSError, IOError) as e:
         sys.exit(f"Error opening address list files.\n{e.strerror}")

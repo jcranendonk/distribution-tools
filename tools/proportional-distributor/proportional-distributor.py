@@ -369,7 +369,9 @@ def before(input_file, drop, addr_type):
         for addr in accounts:
             balance = accounts[addr]
             expected = balance + balance * factor
-            print(f"{addr} - {balance:.3f} - {expected:.3f}")
+            print(
+                f"{addr} - {balance:,.{TOKEN_DECIMALS}f} - {expected:,.{TOKEN_DECIMALS}f}"
+            )
             fw.write(
                 f"{addr},{balance:.{TOKEN_DECIMALS}f},{expected:.{TOKEN_DECIMALS}f}\n"
             )

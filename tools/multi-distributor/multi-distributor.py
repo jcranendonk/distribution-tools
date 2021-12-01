@@ -376,14 +376,14 @@ def before(input_file, drop, addr_type):
             if ok:
                 expected = float(balance) + drop * ct
                 print(
-                    f"{addr} - {balance:.{TOKEN_DECIMALS}f} - {expected:.{TOKEN_DECIMALS}f}"
+                    f"{addr} - {balance:,.{TOKEN_DECIMALS}f} - {expected:,.{TOKEN_DECIMALS}f}"
                 )
                 fw.write(
                     f"{addr},{balance:.{TOKEN_DECIMALS}f},{expected:.{TOKEN_DECIMALS}f}\n"
                 )
             else:
                 expected = drop * ct
-                print(f"{addr} - No token account - {expected:.{TOKEN_DECIMALS}f}")
+                print(f"{addr} - No token account - {expected:,.{TOKEN_DECIMALS}f}")
                 fw.write(f"{addr},No token account,{expected:.{TOKEN_DECIMALS}f}\n")
 
 
@@ -473,7 +473,7 @@ def transfer(
 
         total_items = reduce(lambda x, y: x + y, accounts.values(), 0)
         print(
-            f"Estimated total tokens to be distributed: {bcolors.OKGREEN}{(total_items * drop):,f}{bcolors.ENDC}\n"
+            f"Estimated total tokens to be distributed: {bcolors.OKGREEN}{(total_items * drop):.{TOKEN_DECIMALS}f}{bcolors.ENDC}\n"
         )
     except (OSError, IOError) as e:
         sys.exit(f"Error opening address list files.\n{e.strerror}")
