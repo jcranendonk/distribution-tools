@@ -356,6 +356,7 @@ def before(input_file, drop, addr_type):
         lines = f.readlines()
 
     with open(output_file, "w") as fw:
+        i = 1
         for line in lines:
             try:
                 addr = line.strip()
@@ -365,15 +366,18 @@ def before(input_file, drop, addr_type):
             if ok:
                 expected = float(balance) + drop
                 print(
-                    f"{addr} - {balance:,.{TOKEN_DECIMALS}f} - {expected:,.{TOKEN_DECIMALS}f}"
+                    f"{i}. {addr} - {balance:,.{TOKEN_DECIMALS}f} - {expected:,.{TOKEN_DECIMALS}f}"
                 )
                 fw.write(
                     f"{addr},{balance:.{TOKEN_DECIMALS}f},{expected:.{TOKEN_DECIMALS}f}\n"
                 )
             else:
                 expected = drop
-                print(f"{addr} - No token account - {expected:,.{TOKEN_DECIMALS}f}")
+                print(
+                    f"{i}. {addr} - No token account - {expected:,.{TOKEN_DECIMALS}f}"
+                )
                 fw.write(f"{addr},No token account,{expected:.{TOKEN_DECIMALS}f}\n")
+            i += 1
 
 
 def after(input_file, addr_type):
@@ -385,6 +389,7 @@ def after(input_file, addr_type):
         lines = f.readlines()
 
     with open(output_file, "w") as f:
+        i = 1
         # Read before.csv
         for line in lines:
             output_line = ""
@@ -422,8 +427,9 @@ def after(input_file, addr_type):
             else:
                 output_line += f"{actual},NaN"
 
-            print(startc + output_line + endc)
+            print(f"{i}. {startc}{output_line}{endc}")
             f.write(output_line + "\n")
+            i += 1
 
 
 def transfer(

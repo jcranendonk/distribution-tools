@@ -366,15 +366,17 @@ def before(input_file, drop, addr_type):
         sum_of_balances = sum(accounts.values())
         factor = float(drop) / sum_of_balances
 
+        i = 1
         for addr in accounts:
             balance = accounts[addr]
             expected = balance + balance * factor
             print(
-                f"{addr} - {balance:,.{TOKEN_DECIMALS}f} - {expected:,.{TOKEN_DECIMALS}f}"
+                f"{i}. {addr} - {balance:,.{TOKEN_DECIMALS}f} - {expected:,.{TOKEN_DECIMALS}f}"
             )
             fw.write(
                 f"{addr},{balance:.{TOKEN_DECIMALS}f},{expected:.{TOKEN_DECIMALS}f}\n"
             )
+            i += 1
 
 
 def after(input_file, addr_type):
@@ -386,6 +388,7 @@ def after(input_file, addr_type):
         lines = f.readlines()
 
     with open(output_file, "w") as f:
+        i = 1
         # Read before.csv
         for line in lines:
             output_line = ""
@@ -423,8 +426,9 @@ def after(input_file, addr_type):
             else:
                 output_line += f"{actual},NaN"
 
-            print(startc + output_line + endc)
+            print(f"{i}. {startc}{output_line}{endc}")
             f.write(output_line + "\n")
+            i += 1
 
 
 def transfer(
