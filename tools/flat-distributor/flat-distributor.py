@@ -549,7 +549,6 @@ def transfer(
                 if switch_mode:
                     print("Switching to non-interactive mode.")
                     interactive = False
-                    continue
 
                 if confirm:
                     log_detail_entry += try_transfer(

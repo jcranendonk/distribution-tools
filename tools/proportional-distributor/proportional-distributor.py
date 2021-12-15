@@ -554,7 +554,6 @@ def transfer(
                 if switch_mode:
                     print("Switching to non-interactive mode on next address.")
                     interactive = False
-                    confirm = True
 
                 if confirm:
                     log_detail_entry += try_transfer(
