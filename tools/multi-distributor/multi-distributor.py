@@ -561,6 +561,7 @@ def transfer(
                 )
                 if switch_mode:
                     print("Switching to non-interactive mode.")
+                    print(f"{i+1}. Airdrop to {addr}: ", end="", flush=True)
                     interactive = False
 
                 if confirm:

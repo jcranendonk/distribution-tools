@@ -552,7 +552,8 @@ def transfer(
                     cmd.to_str(), drop, addr, TOKEN_DECIMALS
                 )
                 if switch_mode:
-                    print("Switching to non-interactive mode on next address.")
+                    print("Switching to non-interactive mode.")
+                    print(f"{i+1}. Airdrop to {addr}: ", end="", flush=True)
                     interactive = False
 
                 if confirm:
