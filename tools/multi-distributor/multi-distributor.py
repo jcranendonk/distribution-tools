@@ -88,7 +88,7 @@ def continue_airdrop_prompt(interactive, separator):
 
 
 def single_transaction_prompt(full_cmd, amount, recipient, decimals):
-    msg = f"Sending {bcolors.OKBLUE}{amount:,.{decimals}f}{bcolors.ENDC} tokens to recipient at: {bcolors.OKCYAN}{recipient}{bcolors.ENDC}.\n"
+    msg = f"Sending {bcolors.OKBLUE}{amount:,.{decimals}f}{bcolors.ENDC} tokens to recipient at: {bcolors.OKCYAN}{recipient}{bcolors.ENDC}\n"
     msg += "Cmd to be ran: \n"
     msg += f"    {bcolors.BOLD}" + full_cmd + f"{bcolors.ENDC}"
     print(msg, flush=True)
@@ -132,8 +132,8 @@ def read_addresses(input_path):
     try:
         with open(input_path) as f:
             for line in f:
-                address, balance = line.split(",")
-                accounts[address.strip()] = int(balance.strip())
+                address, count = line.split(",")
+                accounts[address.strip()] = int(count.strip())
     except (OSError, IOError) as e:
         sys.exit(f"Error opening address list files.\n{e.strerror}")
     return accounts
@@ -559,6 +559,7 @@ def transfer(
                 confirm, switch_mode = single_transaction_prompt(
                     cmd.to_str(), amount, addr, TOKEN_DECIMALS
                 )
+
                 if switch_mode:
                     print("Switching to non-interactive mode.")
                     print(f"{i+1}. Airdrop to {addr}: ", end="", flush=True)
@@ -588,7 +589,8 @@ def transfer(
                     with open(log_full, "a") as lf:
                         lf.write(log_detail_entry + LOG_SEPARATOR)
 
-                print(f"{bcolors.WARNING}{SEPARATOR}{bcolors.ENDC}")
+                if not switch_mode:
+                    print(f"{bcolors.WARNING}{SEPARATOR}{bcolors.ENDC}")
                 del cmd
                 i += 1
 
